@@ -52,6 +52,77 @@ function getData() {
   return filterData;
 }
 
+// const url =
+//  "http://oa.xiaoi.com:9080/seeyon/collaboration/collaboration.do?method=newColl&from=templateNewColl&templateId=16777271696550";
+
+// http://oa.xiaoi.com:9080/seeyon/collaboration/collaboration.do?method=newColl&from=templateNewColl&templateId=16908784365880
+
+function sendToOaMessage({ time, gongshi, content, url }) {
+  return new Promise((resolve) => {
+    const ad = window.open(url, "_blank");
+    ad.onload = () => {
+      const tD = ad.top.document;
+      var a = tD.querySelector("#zwIframe");
+      var d = a.contentWindow.document;
+      function onblur(dom) {
+        dom && dom.onblur(dom);
+      }
+
+      // d.querySelector("#field0014").focus();
+      var gs = d.querySelector("#field0014");
+      var cont = d.querySelector("#field0015");
+      var tim = d.querySelector("#field0009");
+
+      gs.focus();
+      gs.value = gongshi;
+      gs.blur();
+
+      cont.focus();
+      cont.value = content;
+      cont.blur();
+
+      tim.focus();
+      tim.value = time;
+      tim.blur();
+
+      setTimeout(() => {
+        onblur(gs);
+      }, 100);
+      setTimeout(() => {
+        onblur(cont);
+      }, 200);
+      setTimeout(() => {
+        onblur(tim);
+      }, 300);
+
+      setTimeout(() => {
+        // console.log(send)
+        // send && send.click();
+        resolve(ad);
+        setTimeout(() => {
+          resolve(ad);
+        }, 1000);
+      }, 3000);
+    };
+  });
+}
+
+//  list.forEach((item) => {
+//   sendMessage(item);
+//  });
+async function startOpenOa(list) {
+  while (list.length) {
+    const temp = list.shift();
+    const win = await sendToOaMessage(temp);
+    // win.close();
+    // const temp = list.splice(0, 1);
+    // const excuteArr = [];
+    // for (const i of temp) {
+    //   excuteArr.push(sendToOaMessage(i));
+    // }
+    // await Promise.all(excuteArr);
+  }
+}
 // ones-layout-content
 
 chrome.runtime.onMessage.addListener((info, sender, sendResponse) => {
@@ -60,6 +131,8 @@ chrome.runtime.onMessage.addListener((info, sender, sendResponse) => {
       const data = getData();
       sendMessage({ type: "data", data });
     }, 1000);
+  } else if (info.type === "oa") {
+    startOpenOa(info.data);
   }
   return true;
 });

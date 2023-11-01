@@ -32,27 +32,54 @@ const queryTabIsEnding = async (query) => {
     queryTab(query, resolve);
   });
 };
-const opentab = async () => {
+const opentab = async (createUrl) => {
   const res = await chrome.tabs.create({
-    url: "http://172.18.208.76/project/#/workspace/team/L5bhWkYr/manhour",
+    url: createUrl,
   });
 
   const { windowId, pendingUrl, url } = res;
   const tab = await queryTabIsEnding({ url: url || pendingUrl });
+  return tab;
+  // console.log(res, "res");
+};
+
+const openOnesTab = async () => {
+  const tab = await opentab(
+    "http://172.18.208.76/project/#/workspace/team/L5bhWkYr/manhour"
+  );
   if (tab && tab.id) {
     sendTabMessage(tab.id, { type: "getlist" });
   }
   // console.log(res, "res");
 };
+const getOaData = (list) => {
+  return list.map((item) => {
+    return {
+      time: item[1],
+      gongshi: item[0],
+      content: item[2],
+      url: `http://oa.xiaoi.com:9080/seeyon/collaboration/collaboration.do?method=newColl&from=templateNewColl&templateId=16777271696550`,
+    };
+  });
+};
 
-chrome.runtime.onMessage.addListener((info, sender, ev) => {
+chrome.runtime.onMessage.addListener(async (info, sender, ev) => {
   if (info.type === "data") {
     console.log(info.data);
+    const oaList = getOaData(info.data);
     //   ev({ type: "getlist" });
+    const tab = await opentab(
+      "http://oa.xiaoi.com:9080/seeyon/main.do?method=main"
+    );
+    //
+    setTimeout(() => {
+      sendTabMessage(tab.id, { type: "oa", data: oaList });
+    }, 500);
   }
   return true;
 });
-this.opentab = opentab;
+
+this.openOnesTab = openOnesTab;
 // addListerMessage(call: NotResponseCall) {
 //   const linstener = (...args: any) => {
 //     call(...args)
