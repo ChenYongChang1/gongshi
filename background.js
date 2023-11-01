@@ -1,3 +1,7 @@
+const mapTemplateId = {
+  k: 1,
+};
+
 const sendTabMessage = (tabId, sendInfo) => {
   return new Promise((resolve) => {
     chrome.tabs.sendMessage(tabId, sendInfo, (...args) => {
@@ -80,6 +84,7 @@ chrome.runtime.onMessage.addListener(async (info, sender, ev) => {
 });
 
 this.openOnesTab = openOnesTab;
+console.log(mapTemplateId, "mapTemplateId");
 // addListerMessage(call: NotResponseCall) {
 //   const linstener = (...args: any) => {
 //     call(...args)
