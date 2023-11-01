@@ -19,19 +19,23 @@ function getData() {
     const [mon, day] = date.split("/");
     return `2023-${mon}-${day}`;
   });
-  var all = Array.from(
+  const dataDoms = Array.from(
     document.querySelector(
       "body > div.container > div > div > div > section > section > main > div > div.workspace-manhour > div > div.ones-layout-top-main-full-main.ManHourReportContent-Container > div:nth-child(1) > div > div.fixedDataTableLayout_rowsContainer > div:nth-child(2)"
     ).childNodes
-  ).map((item, index) => {
+  );
+  console.log(dataDoms, "dataDoms");
+  var all = dataDoms.map((item, index) => {
     const p = item.querySelector(
       ".fixedDataTableCellGroupLayout_cellGroup"
     ).parentNode;
     const all = p.childNodes;
     const first = all[0];
+
     const titleDom = first.querySelector('div[role="presentation"]');
     const title = titleDom.getAttribute("title");
-    const next = Array.from(all[1].childNodes).map((citem, cindex) => {
+    const childrens = Array.from(all[1].childNodes);
+    const next = childrens.map((citem, cindex) => {
       return [parseFloat(citem.textContent) || 0, dateList[cindex], title];
     });
     return next;
