@@ -1,5 +1,6 @@
-const mapTemplateId = {
-  k: 1,
+const tempIdMap = {
+  "RPA-大模型落地项目": "16777271696550",
+  "RD106 - 数据&大模型": "16908784365880",
 };
 
 const sendTabMessage = (tabId, sendInfo) => {
@@ -58,11 +59,32 @@ const openOnesTab = async () => {
 };
 const getOaData = (list) => {
   return list.map((item) => {
+    console.log(item, "item");
+    let tempId = "";
+    let fcontent = "";
+    tempId = tempIdMap[item[3][0]];
+    if (item[2].split("；").length === Array.from(new Set(item[3])).length) {
+      fcontent = item[2];
+    } else {
+      const cArr = item[2].split("；");
+      const projectName = item[3][0];
+      item[3].forEach((citem, cindex) => {
+        if (citem === projectName) {
+          fcontent += cArr[cindex];
+          if (
+            cindex !== item[3].length - 1 &&
+            cindex !== item[3].lastIndexOf(projectName)
+          ) {
+            fcontent += ";";
+          }
+        }
+      });
+    }
     return {
       time: item[1],
       gongshi: item[0],
-      content: item[2],
-      url: `http://oa.xiaoi.com:9080/seeyon/collaboration/collaboration.do?method=newColl&from=templateNewColl&templateId=16777271696550`,
+      content: fcontent,
+      url: `http://oa.xiaoi.com:9080/seeyon/collaboration/collaboration.do?method=newColl&from=templateNewColl&templateId=${tempId}`,
     };
   });
 };
@@ -84,7 +106,6 @@ chrome.runtime.onMessage.addListener(async (info, sender, ev) => {
 });
 
 this.openOnesTab = openOnesTab;
-console.log(mapTemplateId, "mapTemplateId");
 // addListerMessage(call: NotResponseCall) {
 //   const linstener = (...args: any) => {
 //     call(...args)

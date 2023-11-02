@@ -31,26 +31,54 @@ function getData() {
     ).parentNode;
     const all = p.childNodes;
     const first = all[0];
-
+    const groupDom = first.querySelector(
+      "div.groupItem.FDT-Group-Title-Cell  .groupItem-name"
+    );
+    // console.log(groupDom, "groupDom");
+    const groupName = groupDom?.innerText;
     const titleDom = first.querySelector('div[role="presentation"]');
     const title = titleDom.getAttribute("title");
     const childrens = Array.from(all[1].childNodes);
     const next = childrens.map((citem, cindex) => {
-      return [parseFloat(citem.textContent) || 0, dateList[cindex], title];
+      return [
+        parseFloat(citem.textContent) || 0,
+        dateList[cindex],
+        title,
+        groupName,
+      ];
     });
     return next;
   });
+  // console.log("all", all);
+  all.forEach((item, index) => {
+    if (!item[0][3]) {
+      item.forEach((citem) => {
+        citem[3] = all[index - 1][0][3];
+      });
+    }
+  });
   var mergeData = all.reduce((data, item) => {
     if (!data.length)
-      return item.map(([t, d, c]) => (t ? [t, d, c] : [t, d, ""]));
-    item.forEach(([t, d, c], index) => {
+      return item.map(([t, d, c, g]) => {
+        if (!t) {
+          return [t, d, "", []];
+        } else {
+          return [c ? t : 0, d, c || "", c ? [g] : []];
+        }
+        // return t ? [t, d, c] : [t, d, ""];
+      });
+    item.forEach(([t, d, c, g], index) => {
       if (t) {
-        data[index][0] += t;
-        data[index][2] += (data[index][2] ? "；" : "") + c;
+        data[index][0] += !c || c == "null" ? 0 : t;
+        data[index][2] +=
+          (data[index][2] ? "；" : "") + (!c || c == "null" ? "" : c);
+        c && c !== "null" && data[index][3].push(g);
       }
+      // console.log("data[index][2] ", data[index][2], c);
     });
     return data;
   }, []);
+  console.log("mergeData", mergeData);
 
   var filterData = mergeData.filter((i) => i[0]);
   return filterData;
@@ -117,6 +145,7 @@ function sendToOaMessage({ time, gongshi, content, url }) {
 async function startOpenOa(list) {
   while (list.length) {
     const temp = list.shift();
+    console.log("temp", temp);
     const win = await sendToOaMessage(temp);
     // win.close();
     // const temp = list.splice(0, 1);
